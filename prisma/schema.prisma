@@ -1,0 +1,598 @@
+// =============================================================================
+// Sistem Digitalisasi & Keuangan Pesantren Hybrid Web3
+// -----------------------------------------------------------------------------
+// ATURAN UANG:
+// - Semua nominal disimpan sebagai BigInt dalam rupiah penuh (tanpa desimal).
+// - JANGAN gunakan Float/Double untuk saldo, tagihan, atau transaksi.
+// - TransaksiKeuangan bersifat append-only (tidak memiliki updatedAt).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------- ENUMS --------------------------------------
+
+enum Role {
+  BENDAHARA
+  OPERATOR
+  KASIR_KANTIN
+  USTADZ_PENGURUS
+  WALI_SANTRI
+}
+
+enum JenisTagihan {
+  SPP
+  INFAQ_MAKAN
+  DAFTAR_ULANG
+  LAINNYA
+}
+
+enum StatusTagihan {
+  BELUM_LUNAS
+  CICILAN
+  LUNAS
+}
+
+enum JenisTransaksi {
+  BAYAR_SPP
+  BAYAR_INFAQ_MAKAN
+  TOPUP_JAJAN
+  REDIRECT_JAJAN_KE_INFAQ
+  JAJAN_KANTIN
+  PENARIKAN_TUNAI
+  REVERSAL_INFAQ_KE_JAJAN
+}
+
+enum MetodePembayaran {
+  TRANSFER_VA
+  QRIS
+  TUNAI_BENDAHARA
+  AUTO_SYSTEM
+}
+
+enum JenisKegiatan {
+  SHOLAT_JEMAAH
+  NGAJI_KITAB
+  TAHFIDZ
+  SEKOLAH_FORMAL
+}
+
+enum StatusKehadiran {
+  HADIR
+  IZIN
+  SAKIT
+  ALPA
+}
+
+enum KategoriPelanggaran {
+  RINGAN
+  SEDANG
+  BERAT
+}
+
+enum SettingValueType {
+  STRING
+  BOOLEAN
+  JSON
+}
+
+enum Web3SyncStatus {
+  NOT_REQUIRED
+  PENDING
+  SYNCED
+  FAILED
+}
+
+// ------------------- ENUMS STANDAR PESANTREN ---------------------------
+
+enum JenisKelamin {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+enum StatusMukim {
+  MUKIM
+  NON_MUKIM
+}
+
+enum StatusSantri {
+  AKTIF
+  ALUMNI
+  PINDAH
+  DROPOUT
+}
+
+enum PendidikanTerakhir {
+  TIDAK_SEKOLAH
+  SD
+  SMP
+  SMA_MA
+  D3
+  S1
+  S2
+  S3
+  PESANTREN_SALAF
+}
+
+// Status hidup orang tua (ayah/ibu) untuk data kependudukan.
+enum StatusHidup {
+  MASIH_HIDUP
+  MENINGGAL
+}
+
+// Rentang penghasilan bulanan orang tua/wali.
+enum RentangPenghasilan {
+  DI_BAWAH_1_JUTA
+  SATU_SAMPAI_2_JUTA
+  DUA_SAMPAI_5_JUTA
+  LIMA_SAMPAI_10_JUTA
+  DI_ATAS_10_JUTA
+}
+
+enum JabatanGtk {
+  PENGASUH
+  KEPALA_MADRASAH
+  USTADZ_NGAJI
+  GURU_MAPEL
+  BENDAHARA
+  STAF_TATA_USAHA
+}
+
+enum StatusKepegawaian {
+  GTY
+  GTT
+  PNS_DPK
+  PENGABDIAN
+}
+
+enum JenisMutasiSantri {
+  KENAIKAN_KELAS
+  PINDAH_KAMAR
+  KELULUSAN_ALUMNI
+  MUTASI_KELUAR
+}
+
+enum KategoriMapel {
+  SEKOLAH_FORMAL
+  NGAJI_DINIYAH
+  TAHFIDZ
+}
+
+enum Semester {
+  GANJIL
+  GENAP
+}
+
+enum StatusRapor {
+  DRAFT
+  DITERBITKAN
+}
+
+enum JenisTargetPenyesuaian {
+  TAGIHAN
+  REVERSAL_JAJAN
+}
+
+// -------------------------------- MODELS ------------------------------------
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role
+  name          String
+  phone         String?
+  walletAddress String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  santriWali         Santri[]            @relation("WaliSantri")
+  transaksiDibuat    TransaksiKeuangan[] @relation("TransaksiDibuatOleh")
+  merchant           MerchantKantin?
+  pelanggaranDicatat LogPelanggaran[]    @relation("PelanggaranDicatatOleh")
+  systemSettingsDiubah SystemSetting[] @relation("SystemSettingDiubahOleh")
+  jenisPembayaranDibuat JenisPembayaranKustom[]
+  pengingatTagihanWA PengingatTagihanWA[]
+  penyesuaianKeuangan AuditPenyesuaianKeuangan[]
+  // Opsional: satu akun login maksimal terhubung ke satu profil pendidik.
+  guruDanTendik      GuruDanTendik?      @relation("GuruDanTendikUser")
+
+  @@index([role])
+}
+
+model Santri {
+  id                String   @id @default(cuid())
+  nis               String   @unique
+  rfidUid           String?  @unique
+  barcodeCode       String   @unique
+  name              String
+  kelas             String
+  kamar             String
+  // Tetap dipertahankan untuk modul keuangan, kantin, dan absensi.
+  // Sinkron dengan statusSantri: true hanya saat statusSantri = AKTIF.
+  statusAktif       Boolean  @default(true)
+  waliId            String
+  walletAddress     String   @unique
+  // Indeks derivasi HD wallet. Harus stabil agar walletAddress dapat direkonstruksi.
+  walletIndex       Int      @unique
+  saldoJajan        BigInt   @default(0)
+  limitJajanHarian  BigInt   @default(15000)
+  // Opsional. Jika diisi, transaksi kantin wajib menyertakan PIN santri.
+  pinHash           String?
+  // Dispensasi membebaskan santri dari pemotongan otomatis Infaq Makan.
+  isDispensasiInfaq Boolean  @default(false)
+  catatanDispensasi String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // ------------------------- Identitas Santri -------------------------------
+  nik          String       @unique // 16 digit, divalidasi di lapisan aplikasi
+  nisn         String?      @unique
+  nism         String?
+  tempatLahir  String
+  tanggalLahir DateTime     @db.Date
+  jenisKelamin JenisKelamin
+
+  // ------------------------------- Domisili ---------------------------------
+  alamatLengkap String
+  rtRw          String?
+  desaKelurahan String
+  kecamatan     String
+  kabupatenKota String
+  provinsi      String
+
+  // --------------------------- Data orang tua -------------------------------
+  nomorKK String // 16 digit
+
+  // Ayah
+  namaAyah         String
+  nikAyah          String?
+  tempatLahirAyah  String?
+  tanggalLahirAyah DateTime?           @db.Date
+  statusHidupAyah  StatusHidup         @default(MASIH_HIDUP)
+  pendidikanAyah   PendidikanTerakhir?
+  pekerjaanAyah    String?
+  penghasilanAyah  RentangPenghasilan?
+  noHpAyah         String?
+
+  // Ibu
+  namaIbu         String
+  nikIbu          String?
+  tempatLahirIbu  String?
+  tanggalLahirIbu DateTime?           @db.Date
+  statusHidupIbu  StatusHidup         @default(MASIH_HIDUP)
+  pendidikanIbu   PendidikanTerakhir?
+  pekerjaanIbu    String?
+  penghasilanIbu  RentangPenghasilan?
+  noHpIbu         String?
+
+  // ------------------------- Wali pengasuh (opsional) -----------------------
+  // Diisi bila santri diasuh selain oleh orang tua kandung.
+  namaWali         String?
+  hubunganWali     String?
+  tempatLahirWali  String?
+  tanggalLahirWali DateTime?           @db.Date
+  pekerjaanWali    String?
+  penghasilanWali  RentangPenghasilan?
+  noHpWali         String?
+  alamatWali       String?
+
+  // ------------------------------ Berkas santri -----------------------------
+  // URL relatif (/uploads/santri/...) atau URL penyimpanan eksternal.
+  fotoSantriUrl String?
+  fileKkUrl     String?
+  fileAktaUrl   String?
+  fileIjazahUrl String?
+
+  // ----------------------- Status kepesantrenan -----------------------------
+  statusMukim   StatusMukim  @default(MUKIM)
+  statusSantri  StatusSantri @default(AKTIF)
+  tahunMasuk    Int
+  tahunLulus    Int?
+  nomorSyahadah String? // wajib diisi saat statusSantri = ALUMNI
+
+  wali           User                  @relation("WaliSantri", fields: [waliId], references: [id], onDelete: Restrict)
+  tagihan        Tagihan[]
+  transaksi      TransaksiKeuangan[]
+  logAkademik    LogAkademikDanNgaji[]
+  logPelanggaran LogPelanggaran[]
+  riwayatMutasi  RiwayatMutasiSantri[]
+  nilaiUlangan   NilaiUlangan[]
+  rapor          RaporSantri[]
+  auditPenyesuaianKeuangan AuditPenyesuaianKeuangan[]
+  pengingatTagihanWA PengingatTagihanWA[]
+
+  @@index([waliId])
+  @@index([statusAktif])
+  @@index([statusSantri])
+  @@index([tahunMasuk, tahunLulus])
+}
+
+model SystemSetting {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  value       String
+  valueType   SettingValueType @default(STRING)
+  description String?
+  updatedById String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  updatedBy User @relation("SystemSettingDiubahOleh", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@index([updatedById])
+}
+
+model JenisPembayaranKustom {
+  id          String   @id @default(cuid())
+  nama        String
+  nominal     BigInt
+  jatuhTempo  DateTime @db.Date
+  keterangan  String?
+  dibuatOlehId String
+  createdAt   DateTime @default(now())
+
+  dibuatOleh User @relation(fields: [dibuatOlehId], references: [id], onDelete: Restrict)
+  tagihan    Tagihan[]
+  @@index([createdAt])
+}
+
+model PengingatTagihanWA {
+  id        String   @id @default(cuid())
+  santriId  String
+  userId    String
+  createdAt DateTime @default(now())
+  santri    Santri @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  user      User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  @@index([santriId, createdAt])
+}
+
+model Tagihan {
+  id              String        @id @default(cuid())
+  santriId        String
+  jenisPembayaranKustomId String?
+  jenisPembayaranKustom JenisPembayaranKustom? @relation(fields: [jenisPembayaranKustomId], references: [id], onDelete: Restrict)
+  jenisTagihan    JenisTagihan
+  bulan           Int
+  tahun           Int
+  nominalTagihan  BigInt
+  nominalTerbayar BigInt        @default(0)
+  status          StatusTagihan @default(BELUM_LUNAS)
+  jatuhTempo      DateTime      @db.Date
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  santri    Santri              @relation(fields: [santriId], references: [id], onDelete: Restrict)
+  transaksi TransaksiKeuangan[]
+
+  @@index([santriId, status])
+  @@index([status, jatuhTempo])
+  @@index([tahun, bulan])
+}
+
+model TransaksiKeuangan {
+  id               String           @id @default(cuid())
+  kodeTransaksi    String           @unique
+  santriId         String
+  jenisTransaksi   JenisTransaksi
+  nominal          BigInt
+  metodePembayaran MetodePembayaran
+  keterangan       String?
+  txHashWeb3       String?          @unique
+  // Status sinkronisasi dipisah dari hash agar banyak transaksi PENDING
+  // tidak melanggar unique constraint pada txHashWeb3.
+  web3Status       Web3SyncStatus   @default(PENDING)
+  web3Attempts     Int              @default(0)
+  web3LastError    String?
+  web3SyncedAt     DateTime?
+  merchantId       String?
+  createdById      String
+  // Tagihan yang menjadi tujuan alokasi/pengembalian transaksi ini.
+  tagihanId        String?
+  // Menautkan transaksi reversal ke transaksi REDIRECT asal (satu kali saja).
+  reversalOfId     String?          @unique
+  createdAt        DateTime         @default(now())
+
+  santri     Santri             @relation(fields: [santriId], references: [id], onDelete: Restrict)
+  merchant   MerchantKantin?    @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  createdBy  User               @relation("TransaksiDibuatOleh", fields: [createdById], references: [id], onDelete: Restrict)
+  tagihan    Tagihan?           @relation(fields: [tagihanId], references: [id], onDelete: Restrict)
+  reversalOf TransaksiKeuangan? @relation("ReversalInfaq", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversedBy TransaksiKeuangan? @relation("ReversalInfaq")
+
+  @@index([santriId, createdAt])
+  @@index([santriId, merchantId, createdAt])
+  @@index([santriId, jenisTransaksi, createdAt])
+  @@index([jenisTransaksi, createdAt])
+  @@index([createdById])
+  @@index([tagihanId])
+  @@index([web3Status, createdAt])
+}
+
+model AuditPenyesuaianKeuangan {
+  id           String                 @id @default(cuid())
+  santriId     String
+  targetId     String
+  jenisTarget  JenisTargetPenyesuaian
+  nominalLama  BigInt
+  nominalBaru  BigInt
+  selisih      BigInt
+  alasanWajib  String
+  diubahOlehId String
+  createdAt    DateTime               @default(now())
+
+  santri     Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
+  diubahOleh User   @relation(fields: [diubahOlehId], references: [id], onDelete: Restrict)
+
+  @@index([santriId, createdAt])
+  @@index([targetId, jenisTarget])
+  @@index([diubahOlehId, createdAt])
+}
+
+model MerchantKantin {
+  id              String   @id @default(cuid())
+  namaKantin      String
+  pemilikUserId   String   @unique
+  saldoPendapatan BigInt   @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pemilik   User                @relation(fields: [pemilikUserId], references: [id], onDelete: Restrict)
+  transaksi TransaksiKeuangan[]
+}
+
+model LogAkademikDanNgaji {
+  id              String          @id @default(cuid())
+  santriId        String
+  tanggal         DateTime        @db.Date
+  jenisKegiatan   JenisKegiatan
+  statusKehadiran StatusKehadiran
+  catatanUstadz   String
+  nilaiHafalan    Int?
+  createdAt       DateTime        @default(now())
+
+  santri Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
+
+  @@index([santriId, tanggal])
+  @@index([santriId, jenisKegiatan, createdAt])
+  @@index([jenisKegiatan, tanggal])
+}
+
+model LogPelanggaran {
+  id                   String              @id @default(cuid())
+  santriId             String
+  tanggal              DateTime            @db.Date
+  kategori             KategoriPelanggaran
+  deskripsiPelanggaran String
+  poin                 Int
+  tindakanPembinaan    String
+  dicatatOlehId        String
+  createdAt            DateTime            @default(now())
+
+  santri      Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
+  dicatatOleh User   @relation("PelanggaranDicatatOleh", fields: [dicatatOlehId], references: [id], onDelete: Restrict)
+
+  @@index([santriId, tanggal])
+  @@index([santriId, createdAt])
+  @@index([kategori])
+  @@index([dicatatOlehId])
+}
+
+// ------------------------ DATA GURU & USTADZ --------------------------------
+// Satu baris = satu pendidik/tenaga kependidikan. Akun login (User) opsional
+// dan tidak dihapus saat profil pendidik dihapus (onDelete: SetNull).
+model GuruDanTendik {
+  id                     String             @id @default(cuid())
+  userId                 String?            @unique
+  nip                    String?            @unique
+  nuptk                  String?            @unique
+  npk                    String?            @unique
+  nik                    String             @unique // 16 digit
+  namaLengkap            String
+  gelarDepan             String?
+  gelarBelakang          String?
+  tempatLahir            String
+  tanggalLahir           DateTime           @db.Date
+  jenisKelamin           JenisKelamin
+  pendidikanTerakhir     PendidikanTerakhir
+  jurusan                String?
+  jabatan                JabatanGtk
+  statusKepegawaian      StatusKepegawaian
+  mataPelajaranAtauKitab String?
+  noHp                   String
+  alamat                 String
+  statusAktif            Boolean            @default(true)
+  tanggalMulaiTugas      DateTime           @db.Date
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user User? @relation("GuruDanTendikUser", fields: [userId], references: [id], onDelete: SetNull)
+  mataPelajaran MataPelajaran[]
+
+  @@index([jabatan])
+  @@index([statusKepegawaian])
+  @@index([statusAktif])
+  @@index([namaLengkap])
+}
+
+model MataPelajaran {
+  id          String        @id @default(cuid())
+  kodeMapel   String        @unique
+  namaMapel   String
+  kategori    KategoriMapel
+  kkm         Int           @default(75)
+  pengampuId  String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  pengampu GuruDanTendik @relation(fields: [pengampuId], references: [id], onDelete: Restrict)
+  nilai    NilaiUlangan[]
+
+  @@index([pengampuId])
+}
+
+model NilaiUlangan {
+  id          String   @id @default(cuid())
+  santriId    String
+  mapelId     String
+  semester    Semester
+  tahunAjaran String
+  nilaiHarian Int
+  nilaiUTS    Int
+  nilaiUAS    Int
+  nilaiAkhir  Float
+  predikat    String
+  catatanGuru String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  santri Santri        @relation(fields: [santriId], references: [id], onDelete: Restrict)
+  mapel  MataPelajaran @relation(fields: [mapelId], references: [id], onDelete: Restrict)
+
+  @@unique([santriId, mapelId, semester, tahunAjaran])
+  @@index([mapelId, semester, tahunAjaran])
+}
+
+model RaporSantri {
+  id                 String      @id @default(cuid())
+  santriId           String
+  semester           Semester
+  tahunAjaran        String
+  statusRapor        StatusRapor @default(DRAFT)
+  catatanWaliKelas   String      @default("")
+  keputusanKenaikan String      @default("")
+  tanggalTerbit      DateTime?
+  // Rapor terbit tidak berubah ketika biodata, mapel, atau log diperbarui.
+  snapshot           Json?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  santri Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
+
+  @@unique([santriId, semester, tahunAjaran])
+  @@index([statusRapor, semester, tahunAjaran])
+}
+
+// --------------------- RIWAYAT MUTASI / KELULUSAN SANTRI --------------------
+// Append-only. `dicatatOleh` menyimpan nama pencatat sebagai teks agar riwayat
+// tetap utuh meskipun akun admin terkait dinonaktifkan.
+model RiwayatMutasiSantri {
+  id            String            @id @default(cuid())
+  santriId      String
+  jenisMutasi   JenisMutasiSantri
+  keterangan    String
+  tanggalMutasi DateTime          @db.Date
+  dicatatOleh   String
+  createdAt     DateTime          @default(now())
+
+  santri Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
+
+  @@index([santriId, tanggalMutasi])
+  @@index([jenisMutasi, tanggalMutasi])
+}

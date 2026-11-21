@@ -1,0 +1,34 @@
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { apiFetch, toErrorMessage } from "@/lib/client-api";
+import { formatRupiah } from "@/lib/format";
+
+type Profile = Record<string, any>;
+type Session = { user: { role: "OPERATOR" | "BENDAHARA" | "USTADZ_PENGURUS" | "KASIR_KANTIN" } };
+const text = (value: unknown) => value == null || value === "" ? "—" : String(value);
+const date = (value: unknown) => value ? new Date(String(value)).toLocaleDateString("id-ID") : "—";
+
+export default function SantriProfilePage() {
+  const params = useParams<{ id: string }>();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<Session["user"]["role"] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    Promise.all([apiFetch<{ item: Profile }>(`/api/santri/${encodeURIComponent(params.id)}`), apiFetch<Session>("/api/auth/session")])
+      .then(([data, session]) => { setProfile(data.item); setRole(session.user.role); })
+      .catch((caught) => setError(toErrorMessage(caught)));
+  }, [params.id]);
+  if (error) return <main className="mx-auto max-w-4xl p-8"><p className="rounded-xl bg-rose-50 p-4 text-rose-800">{error}</p><Link className="mt-4 inline-block text-emerald-800 underline" href="/">Kembali</Link></main>;
+  if (!profile || !role) return <main className="mx-auto max-w-4xl p-8 text-slate-500">Memuat profil santri…</main>;
+  const group = (title: string, values: Array<[string, unknown]>) => <section className="rounded-2xl border bg-white p-5 shadow-sm"><h2 className="mb-4 text-base font-bold">{title}</h2><dl className="grid gap-4 sm:grid-cols-2">{values.map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 text-sm font-medium">{text(value)}</dd></div>)}</dl></section>;
+  const documents: Array<[string, string | null]> = [["Pas foto", profile.fotoSantriUrl], ["Kartu Keluarga", profile.fileKkUrl], ["Akta kelahiran", profile.fileAktaUrl], ["Ijazah terakhir", profile.fileIjazahUrl]];
+  return <main className="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 sm:px-6"><div className="mx-auto max-w-6xl space-y-5"><header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-white p-5"><div className="flex items-center gap-4">{profile.fotoSantriUrl ? <img src={profile.fotoSantriUrl} alt={`Foto ${profile.name}`} className="h-20 w-20 rounded-xl object-cover" /> : null}<div><p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Profil Detail Santri</p><h1 className="mt-1 text-2xl font-bold">{profile.name}</h1><p className="text-sm text-slate-500">NIS {profile.nis} · {profile.kelas} · {profile.statusSantri}</p></div></div><Link href={role === "BENDAHARA" ? "/admin/keuangan" : role === "OPERATOR" ? "/admin/data-induk" : role === "USTADZ_PENGURUS" ? "/admin/akademik" : "/kantin/pos"} className="rounded-lg border px-4 py-2 text-sm font-semibold">Kembali ke dashboard</Link></header>
+    <div className="grid gap-5 lg:grid-cols-2">{group("Biodata Induk", [["NIS", profile.nis], ["NISN", profile.nisn], ["NIK", profile.nik], ["Tempat, tanggal lahir", `${text(profile.tempatLahir)}, ${date(profile.tanggalLahir)}`], ["Jenis kelamin", profile.jenisKelamin], ["Kelas", profile.kelas], ["Kamar", profile.kamar], ["Alamat", [profile.alamatLengkap, profile.desaKelurahan, profile.kecamatan, profile.kabupatenKota, profile.provinsi].filter(Boolean).join(", ")], ["Status", profile.statusSantri]])}{group("Data Ayah, Ibu & Wali", [["Ayah", profile.namaAyah], ["Status hidup ayah", profile.statusHidupAyah], ["Pekerjaan / penghasilan ayah", `${text(profile.pekerjaanAyah)} / ${text(profile.penghasilanAyah)}`], ["Ibu", profile.namaIbu], ["Status hidup ibu", profile.statusHidupIbu], ["Pekerjaan / penghasilan ibu", `${text(profile.pekerjaanIbu)} / ${text(profile.penghasilanIbu)}`], ["Wali pengasuh", profile.namaWali], ["Hubungan / no. HP wali", `${text(profile.hubunganWali)} / ${text(profile.noHpWali)}`]])}</div>
+    {role === "OPERATOR" ? <><section className="rounded-2xl border bg-white p-5"><h2 className="mb-3 font-bold">Arsip Berkas & Akun Wali</h2><div className="grid gap-3 sm:grid-cols-2">{documents.map(([label, url]) => <div key={label} className="rounded-xl border p-3"><p className="text-sm font-semibold">{label}</p>{url ? <a className="mt-2 inline-block text-sm text-emerald-800 underline" href={url} target="_blank" rel="noreferrer">Buka berkas</a> : <p className="mt-2 text-sm text-amber-700">Belum diunggah</p>}</div>)}</div><p className="mt-4 text-sm">Akun wali: {profile.wali?.name ?? "—"} · {profile.wali?.email ?? "—"} · {profile.wali?.phone ?? "—"}</p></section></> : null}
+    {role === "BENDAHARA" ? <>{group("Tagihan & Riwayat Penyesuaian", [["Jumlah tagihan", profile.tagihan.length]])}<section className="overflow-x-auto rounded-2xl border bg-white p-5"><h2 className="mb-3 font-bold">Tagihan santri</h2><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Jenis</th><th className="p-2">Periode</th><th className="p-2">Tagihan</th><th className="p-2">Terbayar</th><th className="p-2">Status</th></tr></thead><tbody>{profile.tagihan.map((bill: Profile) => <tr key={bill.id} className="border-t"><td className="p-2">{bill.jenisPembayaranKustom?.nama ?? bill.jenisTagihan}</td><td className="p-2">{bill.bulan}/{bill.tahun}</td><td className="p-2">{formatRupiah(bill.nominalTagihan)}</td><td className="p-2">{formatRupiah(bill.nominalTerbayar)}</td><td className="p-2">{bill.status}</td></tr>)}</tbody></table>{profile.auditPenyesuaianKeuangan?.map((audit: Profile) => <p key={audit.id} className="mt-3 text-sm">{date(audit.createdAt)} · {audit.alasanWajib} · diubah oleh {audit.diubahOleh.name}</p>)}</section></> : null}
+    {role === "USTADZ_PENGURUS" ? <section className="rounded-2xl border bg-white p-5"><h2 className="mb-3 font-bold">Riwayat Absensi & Nilai</h2>{profile.riwayatAkademik.absensi.map((item: Profile) => <p key={item.id} className="border-b py-2 text-sm">{date(item.tanggal)} · {item.jenisKegiatan} · {item.statusKehadiran} · {item.catatanUstadz}</p>)}{profile.riwayatAkademik.nilai.map((item: Profile) => <p key={item.id} className="border-b py-2 text-sm">Nilai akhir {item.nilaiAkhir} · {item.tahunAjaran} · {item.semester}</p>)}</section> : null}
+    {role === "KASIR_KANTIN" ? <section className="rounded-2xl border bg-white p-5"><h2 className="mb-3 font-bold">Saldo Jajan & Pembayaran Kantin</h2><p className="text-lg font-semibold">Saldo {formatRupiah(profile.informasiKantin.saldoJajan)}</p>{profile.informasiKantin.transaksi.map((tx: Profile) => <p key={tx.id} className="border-b py-2 text-sm">{date(tx.createdAt)} · {formatRupiah(tx.nominal)} · {tx.keterangan ?? "Transaksi kantin"}</p>)}</section> : null}</div></main>;
+}

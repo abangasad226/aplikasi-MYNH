@@ -1,0 +1,22 @@
+.rapor-document th,
+.rapor-document td {
+  border: 1px solid #94a3b8;
+  padding: 6px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.rapor-document .text-left { text-align: left; }
+.rapor-document th { background: #f1f5f9; }
+.rapor-document dd { overflow-wrap: anywhere; }
+@page { size: A4; margin: 12mm; }
+@media print {
+  html, body { background: white !important; }
+  .rapor-toolbar { display: none !important; }
+  .rapor-page { padding: 0 !important; background: white !important; }
+  .rapor-document { padding: 0 !important; max-width: none !important; font-size: 10pt; box-shadow: none !important; }
+  .rapor-document .overflow-x-auto { overflow: visible !important; }
+  .rapor-document thead { display: table-header-group; }
+  .rapor-document tr, .rapor-signatures, .rapor-notes { break-inside: avoid; }
+  .rapor-document h2 { break-after: avoid; }
+  .rapor-document { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
