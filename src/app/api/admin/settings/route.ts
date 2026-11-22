@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
         value: normalizedValue,
         valueType: SettingValueType.BOOLEAN,
         description:
-          "Otomatis mengalihkan titipan uang jajan wali ke pelunasan tunggakan Infaq Makan.",
+          "Otomatis mengalihkan setoran uang jajan wali ke pelunasan tunggakan Infaq Makan.",
         updatedById: actor.id,
       },
       select: SETTING_SELECT,

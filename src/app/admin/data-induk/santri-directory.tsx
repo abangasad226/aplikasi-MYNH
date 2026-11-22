@@ -410,7 +410,7 @@ export function SantriDirectory({
       const form = new FormData();
       form.append("file", file);
       const imported = await apiFetch<ImportReport>(
-        "/api/admin/data/import-excel?jenis=santri",
+        "/api/operator/santri/import",
         { method: "POST", body: form },
       );
 
@@ -1075,7 +1075,7 @@ export function SantriDirectory({
           santri={formState.santri}
           opsi={opsi}
           defaultStatus={mode}
-          canDispensasi={canRefund}
+
           onClose={() => setFormState(null)}
           onSaved={handleSavedSantri}
         />
@@ -1149,6 +1149,7 @@ export function SantriDirectory({
               </div>
             </div>
 
+            {report.warnings?.length ? <div className="space-y-1 rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900">{report.warnings.map((warning) => <p key={warning}>{warning}</p>)}</div> : null}
             {report.errors.length > 0 ? (
               <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-xl border border-amber-200 bg-amber-50/60 p-3">
                 {report.errors.map((item, index) => (

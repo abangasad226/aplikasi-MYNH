@@ -29,6 +29,7 @@ import {
 import { PesantrenLogo } from "@/components/pesantren-logo";
 import { PenyesuaianPanel } from "./penyesuaian-panel";
 import { TagihanPanel } from "./tagihan-panel";
+import { TopupPanel } from "./topup-panel";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { apiFetch, toErrorMessage } from "@/lib/client-api";
@@ -84,7 +85,7 @@ const JENIS_KATEGORI: Record<
     tone: "teal",
     direction: "MASUK",
   },
-  TOPUP_JAJAN: { label: "Titip Jajan", tone: "blue", direction: "MASUK" },
+  TOPUP_JAJAN: { label: "Uang Jajan", tone: "blue", direction: "MASUK" },
   REDIRECT_JAJAN_KE_INFAQ: {
     label: "Auto-Redirect Infaq",
     tone: "amber",
@@ -352,8 +353,8 @@ export default function AdminKeuanganPage() {
       setPolicyFeedback({
         tone: "success",
         message: next
-          ? "Kebijakan diaktifkan. Titipan jajan wali akan melunasi Infaq Makan terlebih dahulu."
-          : "Kebijakan dinonaktifkan. Titipan jajan wali langsung masuk saldo jajan santri.",
+          ? "Kebijakan diaktifkan. Uang jajan wali akan melunasi Infaq Makan terlebih dahulu."
+          : "Kebijakan dinonaktifkan. Uang jajan wali langsung masuk ke saldo jajan santri.",
       });
     } catch (err) {
       setPolicyFeedback({ tone: "error", message: toErrorMessage(err) });
@@ -492,6 +493,7 @@ export default function AdminKeuanganPage() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <TopupPanel />
         <TagihanPanel />
         <PenyesuaianPanel />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -500,7 +502,7 @@ export default function AdminKeuanganPage() {
               Ringkasan Kas
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Konsolidasi SPP, Infaq Makan, dan dana titipan uang jajan santri.
+              Konsolidasi SPP, Infaq Makan, dan saldo uang jajan santri.
             </p>
           </div>
           {data ? (
@@ -578,7 +580,7 @@ export default function AdminKeuanganPage() {
               />
               <StatCard
                 icon={Wallet}
-                label="Dana Titipan Uang Jajan"
+                label="Saldo Uang Jajan"
                 tone="blue"
                 value={formatRupiah(data.summary.totalTitipanJajan)}
                 hint={`Total saldo ${data.summary.santriDenganSaldo} santri, termasuk alumni yang belum dicairkan.`}
@@ -651,7 +653,7 @@ export default function AdminKeuanganPage() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-                        Auto-Redirect Titipan Jajan
+                        Auto-Redirect Uang Jajan
                       </h2>
                       <Badge tone="emerald">
                         <CheckCircle2 aria-hidden="true" size={12} />
@@ -659,7 +661,7 @@ export default function AdminKeuanganPage() {
                       </Badge>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      Pemotongan otomatis titipan jajan untuk tunggakan Infaq Makan aktif secara sistem.
+                      Pengalihan otomatis saldo uang jajan untuk tunggakan Infaq Makan aktif secara sistem.
                     </p>
                   </div>
                 </div>
@@ -671,7 +673,7 @@ export default function AdminKeuanganPage() {
                 className="mt-5"
                 title="Kebijakan Sistem Otomatis"
               >
-                Setiap penitipan uang jajan dari wali santri otomatis dialihkan untuk melunasi tunggakan Infaq Makan terlebih dahulu. Jika nominal tagihan perlu keringanan, lakukan penyesuaian nominal dengan alasan wajib melalui panel Penyesuaian Keuangan.
+                Setoran uang jajan otomatis melunasi tunggakan Infaq Makan terlebih dahulu. Pengecualian hanya berlaku bagi santri kalong atau yatim piatu yang ditetapkan Bendahara melalui panel Dispensasi Infaq Makan; setoran mereka langsung menambah saldo jajan. Penyesuaian nominal lainnya tetap memerlukan alasan wajib.
               </Alert>
 
               <div className="mt-5 flex flex-col gap-2 border-t border-slate-100 pt-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">

@@ -41,7 +41,7 @@ const DEMO_ACCOUNTS: Array<{
 const FEATURES: Array<{ icon: LucideIcon; text: string }> = [
   {
     icon: Wallet,
-    text: "Dana titipan uang jajan terpisah dari SPP dan Infaq Makan.",
+    text: "Saldo uang jajan terpisah dari SPP dan Infaq Makan.",
   },
   {
     icon: BookOpenCheck,

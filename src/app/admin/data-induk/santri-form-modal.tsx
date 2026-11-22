@@ -65,12 +65,18 @@ function initialState(
     nomorKK: santri?.nomorKK ?? "",
     namaAyah: santri?.namaAyah ?? "",
     nikAyah: santri?.nikAyah ?? "",
+    tempatLahirAyah: santri?.tempatLahirAyah ?? "",
+    tanggalLahirAyah: santri?.tanggalLahirAyah ?? "",
+    pendidikanAyah: santri?.pendidikanAyah ?? "",
     statusHidupAyah: santri?.statusHidupAyah ?? "MASIH_HIDUP",
     pekerjaanAyah: santri?.pekerjaanAyah ?? "",
     penghasilanAyah: santri?.penghasilanAyah ?? "",
     noHpAyah: santri?.noHpAyah ?? "",
     namaIbu: santri?.namaIbu ?? "",
     nikIbu: santri?.nikIbu ?? "",
+    tempatLahirIbu: santri?.tempatLahirIbu ?? "",
+    tanggalLahirIbu: santri?.tanggalLahirIbu ?? "",
+    pendidikanIbu: santri?.pendidikanIbu ?? "",
     statusHidupIbu: santri?.statusHidupIbu ?? "MASIH_HIDUP",
     pekerjaanIbu: santri?.pekerjaanIbu ?? "",
     penghasilanIbu: santri?.penghasilanIbu ?? "",
@@ -85,12 +91,29 @@ function initialState(
     tahunMasuk: String(santri?.tahunMasuk ?? CURRENT_YEAR),
     tahunLulus: santri?.tahunLulus ? String(santri.tahunLulus) : "",
     nomorSyahadah: santri?.nomorSyahadah ?? "",
+    nomorUrutAsal: santri?.nomorUrutAsal ? String(santri.nomorUrutAsal) : "",
+    jenjangAsal: santri?.jenjangAsal ?? "",
+    anakKe: santri?.anakKe ? String(santri.anakKe) : "",
+    dariSaudara: santri?.dariSaudara ? String(santri.dariSaudara) : "",
+    noIjazahSebelumnya: santri?.noIjazahSebelumnya ?? "",
+    noPesertaUjianSebelumnya: santri?.noPesertaUjianSebelumnya ?? "",
+    noSkhunSebelumnya: santri?.noSkhunSebelumnya ?? "",
+    diterimaDiKelas: santri?.diterimaDiKelas ?? "",
+    tanggalDiterima: santri?.tanggalDiterima ?? "",
+    keluarDiKelas: santri?.keluarDiKelas ?? "",
+    tanggalKeluar: santri?.tanggalKeluar ?? "",
+    alasanKeluar: santri?.alasanKeluar ?? "",
+    nomorKartuPip: santri?.nomorKartuPip ?? "",
+    kks: santri?.kks ?? "",
+    kps: santri?.kps ?? "",
+    pkh: santri?.pkh ?? "",
+    catatanDataLegacy: santri?.catatanDataLegacy ?? "",
     kelas: santri?.kelas ?? "",
+    kelasNgaji: santri?.kelasNgaji ?? "",
     kamar: santri?.kamar ?? "",
     rfidUid: santri?.rfidUid ?? "",
     barcodeCode: santri?.barcodeCode ?? "",
-    isDispensasiInfaq: santri?.isDispensasiInfaq ? "true" : "false",
-    catatanDispensasi: santri?.catatanDispensasi ?? "",
+
   };
 }
 
@@ -134,7 +157,7 @@ function requirementLabel(values: FormValues): Array<[string, string]> {
   return list;
 }
 
-function buildPayload(values: FormValues, includeDispensasi: boolean) {
+function buildPayload(values: FormValues) {
   const text = (key: string) => {
     const value = (values[key] ?? "").trim();
     return value === "" ? undefined : value;
@@ -147,6 +170,7 @@ function buildPayload(values: FormValues, includeDispensasi: boolean) {
     nism: text("nism"),
     name: values.name.trim(),
     kelas: values.kelas.trim(),
+    kelasNgaji: text("kelasNgaji"),
     kamar: values.kamar.trim(),
     rfidUid: text("rfidUid"),
     barcodeCode: text("barcodeCode"),
@@ -162,12 +186,18 @@ function buildPayload(values: FormValues, includeDispensasi: boolean) {
     nomorKK: values.nomorKK.trim(),
     namaAyah: values.namaAyah.trim(),
     nikAyah: text("nikAyah"),
+    tempatLahirAyah: text("tempatLahirAyah"),
+    tanggalLahirAyah: text("tanggalLahirAyah"),
+    pendidikanAyah: text("pendidikanAyah"),
     statusHidupAyah: values.statusHidupAyah,
     pekerjaanAyah: text("pekerjaanAyah"),
     penghasilanAyah: text("penghasilanAyah"),
     noHpAyah: text("noHpAyah"),
     namaIbu: values.namaIbu.trim(),
     nikIbu: text("nikIbu"),
+    tempatLahirIbu: text("tempatLahirIbu"),
+    tanggalLahirIbu: text("tanggalLahirIbu"),
+    pendidikanIbu: text("pendidikanIbu"),
     statusHidupIbu: values.statusHidupIbu,
     pekerjaanIbu: text("pekerjaanIbu"),
     penghasilanIbu: text("penghasilanIbu"),
@@ -182,12 +212,23 @@ function buildPayload(values: FormValues, includeDispensasi: boolean) {
     fileKkUrl: text("fileKkUrl"),
     fileAktaUrl: text("fileAktaUrl"),
     fileIjazahUrl: text("fileIjazahUrl"),
-    ...(includeDispensasi
-      ? {
-          isDispensasiInfaq: values.isDispensasiInfaq === "true",
-          catatanDispensasi: text("catatanDispensasi") ?? null,
-        }
-      : {}),
+    nomorUrutAsal: text("nomorUrutAsal") ? Number(values.nomorUrutAsal) : undefined,
+    jenjangAsal: text("jenjangAsal"),
+    anakKe: text("anakKe") ? Number(values.anakKe) : undefined,
+    dariSaudara: text("dariSaudara") ? Number(values.dariSaudara) : undefined,
+    noIjazahSebelumnya: text("noIjazahSebelumnya"),
+    noPesertaUjianSebelumnya: text("noPesertaUjianSebelumnya"),
+    noSkhunSebelumnya: text("noSkhunSebelumnya"),
+    diterimaDiKelas: text("diterimaDiKelas"),
+    tanggalDiterima: text("tanggalDiterima"),
+    keluarDiKelas: text("keluarDiKelas"),
+    tanggalKeluar: text("tanggalKeluar"),
+    alasanKeluar: text("alasanKeluar"),
+    nomorKartuPip: text("nomorKartuPip"),
+    kks: text("kks"),
+    kps: text("kps"),
+    pkh: text("pkh"),
+    catatanDataLegacy: text("catatanDataLegacy"),
   };
 }
 
@@ -196,7 +237,7 @@ export function SantriFormModal({
   santri,
   opsi,
   defaultStatus,
-  canDispensasi = false,
+
   onClose,
   onSaved,
 }: {
@@ -204,7 +245,7 @@ export function SantriFormModal({
   santri: SantriItem | null;
   opsi: OpsiResponse | null;
   defaultStatus: "AKTIF" | "ALUMNI";
-  canDispensasi?: boolean;
+
   onClose: () => void;
   onSaved: (item: SantriItem, mode: "create" | "edit") => void;
 }) {
@@ -307,7 +348,7 @@ export function SantriFormModal({
     setError(null);
 
     try {
-      const payload = buildPayload(values, mode === "edit" && canDispensasi);
+      const payload = buildPayload(values);
       const response =
         mode === "create"
           ? await apiFetch<SantriMutationResponse>("/api/operator/santri", {
@@ -571,6 +612,9 @@ export function SantriFormModal({
                 maxLength={16}
               />
             </Field>
+            <Field label="Tempat lahir ayah" htmlFor="tempatLahirAyah"><TextInput id="tempatLahirAyah" value={values.tempatLahirAyah} onChange={(event) => update("tempatLahirAyah", event.target.value)} /></Field>
+            <Field label="Tanggal lahir ayah" htmlFor="tanggalLahirAyah"><TextInput id="tanggalLahirAyah" type="date" value={values.tanggalLahirAyah} onChange={(event) => update("tanggalLahirAyah", event.target.value)} /></Field>
+            <Field label="Pendidikan ayah" htmlFor="pendidikanAyah"><SelectInput id="pendidikanAyah" value={values.pendidikanAyah} onChange={(event) => update("pendidikanAyah", event.target.value)}><option value="">— Pilih —</option>{["TIDAK_SEKOLAH", "SD", "SMP", "SMA_MA", "D3", "S1", "S2", "S3", "PESANTREN_SALAF"].map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}</SelectInput></Field>
             <Field label="No. HP / WhatsApp Ayah" htmlFor="noHpAyah" hint="Format: 08xxx">
               <TextInput
                 id="noHpAyah"
@@ -628,6 +672,9 @@ export function SantriFormModal({
                 maxLength={16}
               />
             </Field>
+            <Field label="Tempat lahir ibu" htmlFor="tempatLahirIbu"><TextInput id="tempatLahirIbu" value={values.tempatLahirIbu} onChange={(event) => update("tempatLahirIbu", event.target.value)} /></Field>
+            <Field label="Tanggal lahir ibu" htmlFor="tanggalLahirIbu"><TextInput id="tanggalLahirIbu" type="date" value={values.tanggalLahirIbu} onChange={(event) => update("tanggalLahirIbu", event.target.value)} /></Field>
+            <Field label="Pendidikan ibu" htmlFor="pendidikanIbu"><SelectInput id="pendidikanIbu" value={values.pendidikanIbu} onChange={(event) => update("pendidikanIbu", event.target.value)}><option value="">— Pilih —</option>{["TIDAK_SEKOLAH", "SD", "SMP", "SMA_MA", "D3", "S1", "S2", "S3", "PESANTREN_SALAF"].map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}</SelectInput></Field>
             <Field label="No. HP / WhatsApp Ibu" htmlFor="noHpIbu" hint="Format: 08xxx">
               <TextInput
                 id="noHpIbu"
@@ -720,6 +767,9 @@ export function SantriFormModal({
                   placeholder="Kelas 10 - Aliyah"
                 />
               </Field>
+              <Field label="Kelas Ngaji" htmlFor="kelasNgaji" hint="Isi terpisah dari kelas sekolah; dapat dilengkapi manual.">
+                <TextInput id="kelasNgaji" value={values.kelasNgaji} onChange={(event) => update("kelasNgaji", event.target.value)} placeholder="Ibtidaiyah / Wustha / Ulya / Kitab" />
+              </Field>
               <Field label="Kamar" htmlFor="kamar" required hint="Boleh memilih atau mengetik kamar baru.">
                 <TextInput
                   id="kamar"
@@ -801,6 +851,26 @@ export function SantriFormModal({
                 </Field>
               </div>
             ) : null}
+
+            <FormSection title="Arsip Buku Induk Lama" description="Nomor urut, riwayat sekolah, serta bantuan sosial dari arsip Excel. Kolom PASS dari file lama tidak diimpor demi keamanan." icon={<ShieldCheck aria-hidden="true" size={18} />}>
+              <Field label="Nomor urut asal"><TextInput type="number" value={values.nomorUrutAsal} onChange={(event) => update("nomorUrutAsal", event.target.value)} /></Field>
+              <Field label="Jenjang asal"><TextInput value={values.jenjangAsal} onChange={(event) => update("jenjangAsal", event.target.value)} placeholder="MTs / MA" /></Field>
+              <Field label="Anak ke"><TextInput type="number" value={values.anakKe} onChange={(event) => update("anakKe", event.target.value)} /></Field>
+              <Field label="Jumlah bersaudara"><TextInput type="number" value={values.dariSaudara} onChange={(event) => update("dariSaudara", event.target.value)} /></Field>
+              <Field label="Nomor ijazah sebelumnya"><TextInput value={values.noIjazahSebelumnya} onChange={(event) => update("noIjazahSebelumnya", event.target.value)} /></Field>
+              <Field label="Nomor peserta ujian sebelumnya"><TextInput value={values.noPesertaUjianSebelumnya} onChange={(event) => update("noPesertaUjianSebelumnya", event.target.value)} /></Field>
+              <Field label="Nomor SKHUN sebelumnya"><TextInput value={values.noSkhunSebelumnya} onChange={(event) => update("noSkhunSebelumnya", event.target.value)} /></Field>
+              <Field label="Diterima di kelas"><TextInput value={values.diterimaDiKelas} onChange={(event) => update("diterimaDiKelas", event.target.value)} /></Field>
+              <Field label="Tanggal diterima"><TextInput type="date" value={values.tanggalDiterima} onChange={(event) => update("tanggalDiterima", event.target.value)} /></Field>
+              <Field label="Kelas saat keluar"><TextInput value={values.keluarDiKelas} onChange={(event) => update("keluarDiKelas", event.target.value)} /></Field>
+              <Field label="Tanggal keluar"><TextInput type="date" value={values.tanggalKeluar} onChange={(event) => update("tanggalKeluar", event.target.value)} /></Field>
+              <Field label="Alasan keluar" className="sm:col-span-2"><TextAreaInput value={values.alasanKeluar} onChange={(event) => update("alasanKeluar", event.target.value)} rows={2} /></Field>
+              <Field label="Nomor Kartu PIP / KIP"><TextInput value={values.nomorKartuPip} onChange={(event) => update("nomorKartuPip", event.target.value)} /></Field>
+              <Field label="KKS"><TextInput value={values.kks} onChange={(event) => update("kks", event.target.value)} /></Field>
+              <Field label="KPS"><TextInput value={values.kps} onChange={(event) => update("kps", event.target.value)} /></Field>
+              <Field label="PKH"><TextInput value={values.pkh} onChange={(event) => update("pkh", event.target.value)} /></Field>
+              <Field label="Catatan verifikasi arsip" className="sm:col-span-2"><TextAreaInput value={values.catatanDataLegacy} onChange={(event) => update("catatanDataLegacy", event.target.value)} rows={2} /></Field>
+            </FormSection>
 
             <FormSection
               title="Kartu RFID & Barcode"

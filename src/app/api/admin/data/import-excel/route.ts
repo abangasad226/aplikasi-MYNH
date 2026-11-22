@@ -151,6 +151,7 @@ async function importSantri(
       tanggalLahir: cellDateKey(cells[SANTRI_EXCEL_HEADERS[6]]),
       jenisKelamin: cellText(cells[SANTRI_EXCEL_HEADERS[7]]),
       kelas: cellText(cells["Kelas"]),
+      kelasNgaji: optionalFromCell(cells["Kelas Ngaji"]),
       kamar: cellText(cells["Kamar"]),
       alamatLengkap: cellText(cells["Alamat Lengkap"]),
       rtRw: optionalFromCell(cells["RT/RW"]),

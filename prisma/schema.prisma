@@ -53,6 +53,7 @@ enum MetodePembayaran {
   TRANSFER_VA
   QRIS
   TUNAI_BENDAHARA
+  TUNAI_KASIR
   AUTO_SYSTEM
 }
 
@@ -213,6 +214,7 @@ model Santri {
   barcodeCode       String   @unique
   name              String
   kelas             String
+  kelasNgaji        String?
   kamar             String
   // Tetap dipertahankan untuk modul keuangan, kantin, dan absensi.
   // Sinkron dengan statusSantri: true hanya saat statusSantri = AKTIF.
@@ -289,6 +291,25 @@ model Santri {
   fileKkUrl     String?
   fileAktaUrl   String?
   fileIjazahUrl String?
+
+  // -------------------- Arsip dari buku induk lama --------------------------
+  nomorUrutAsal                  Int?
+  jenjangAsal                    String?
+  anakKe                         Int?
+  dariSaudara                    Int?
+  noIjazahSebelumnya             String?
+  noPesertaUjianSebelumnya       String?
+  noSkhunSebelumnya              String?
+  diterimaDiKelas                 String?
+  tanggalDiterima                 DateTime? @db.Date
+  keluarDiKelas                   String?
+  tanggalKeluar                  DateTime? @db.Date
+  alasanKeluar                   String?
+  nomorKartuPip                  String?
+  kks                            String?
+  kps                            String?
+  pkh                            String?
+  catatanDataLegacy              String?
 
   // ----------------------- Status kepesantrenan -----------------------------
   statusMukim   StatusMukim  @default(MUKIM)

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
           by: ["jenisTransaksi"],
           _sum: { nominal: true },
         }),
-        // Kewajiban titipan dihitung dari seluruh santri yang masih menyimpan
+        // Saldo uang jajan dihitung dari seluruh santri yang masih menyimpan
         // saldo, termasuk alumni/keluar yang belum dicairkan.
         prisma.santri.aggregate({
           where: { saldoJajan: { gt: 0n } },

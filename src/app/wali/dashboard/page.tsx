@@ -81,7 +81,7 @@ const JENIS_TRANSAKSI: Record<
     direction: "IN",
   },
   TOPUP_JAJAN: {
-    label: "Titipan Uang Jajan",
+    label: "Uang Jajan",
     tone: "blue",
     icon: PlusCircle,
     direction: "IN",
@@ -832,7 +832,7 @@ export default function WaliDashboardPage() {
                       {formatRupiah(selected.santri.saldoJajan)}
                     </p>
                     <p className="mt-1 text-[11px] leading-5 text-emerald-50">
-                      Dana titipan khusus jajan kantin, terpisah dari SPP dan
+                      Saldo uang jajan untuk kantin, terpisah dari SPP dan
                       Infaq Makan.
                     </p>
                     <Button
@@ -841,7 +841,7 @@ export default function WaliDashboardPage() {
                       onClick={openDeposit}
                     >
                       <PlusCircle aria-hidden="true" size={18} />
-                      Setor / Titip Uang Jajan
+                      Top-up Uang Jajan
                     </Button>
                   </div>
 
@@ -955,7 +955,7 @@ export default function WaliDashboardPage() {
                           riwayatFilter === "INFAQ"
                             ? "Belum ada pembayaran atau pengalihan dana Infaq Makan pada periode ini."
                             : riwayatFilter === "JAJAN"
-                              ? "Belum ada titipan atau belanja jajan pada periode ini."
+                              ? "Belum ada top-up atau belanja uang jajan pada periode ini."
                               : "Belum ada pembayaran SPP pada periode ini."
                         }
                       />
@@ -1129,7 +1129,7 @@ export default function WaliDashboardPage() {
         <Modal
           open={depositOpen}
           onClose={closeDeposit}
-          title={depositResult ? "Setoran Berhasil" : "Setor / Titip Uang Jajan"}
+          title={depositResult ? "Top-up Berhasil" : "Top-up Uang Jajan"}
           description={
             depositResult
               ? "Alokasi dana sesuai kebijakan pesantren yang berlaku."

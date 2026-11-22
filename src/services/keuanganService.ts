@@ -99,10 +99,10 @@ function buatKodeTransaksi(prefix: "TOPUP" | "REDIRECT" | "REVERSAL"): string {
 }
 
 /**
- * Menyimpan titipan uang jajan dan menjalankan auto-redirect ke tunggakan
+ * Menyimpan setoran uang jajan dan menjalankan auto-redirect ke tunggakan
  * Infaq Makan sesuai kebijakan AUTO_REDIRECT_JAJAN_TO_INFAQ.
  *
- * Satu deposit dapat menghasilkan beberapa transaksi ledger: satu
+ * Satu setoran dapat menghasilkan beberapa transaksi ledger: satu
  * REDIRECT_JAJAN_KE_INFAQ per tagihan yang dialokasikan, lalu satu
  * TOPUP_JAJAN untuk sisa yang benar-benar masuk saldo jajan.
  */
@@ -155,6 +155,7 @@ export async function setorTitipanJajan(
           waliId: true,
           statusAktif: true,
           saldoJajan: true,
+          isDispensasiInfaq: true,
         },
       });
 
@@ -185,12 +186,12 @@ export async function setorTitipanJajan(
       // Langkah A: baca kebijakan auto-redirect. Setting yang tidak ada
       // diperlakukan sebagai nonaktif agar tidak ada pengalihan tanpa opt-in.
       // Santri dengan dispensasi Infaq Makan selalu dilewati, sehingga seluruh
-      // titipan langsung menjadi saldo jajan.
+      // setoran langsung menjadi saldo jajan.
       const autoRedirectAktif = true;
 
       let tagihanList: TagihanTerbuka[] = [];
 
-      if (autoRedirectAktif) {
+      if (autoRedirectAktif && !santri.isDispensasiInfaq) {
         // Langkah B: kunci lalu ambil semua Infaq Makan yang masih terbuka,
         // diurutkan dari tahun/bulan paling lama.
         await tx.$queryRaw`
@@ -276,7 +277,7 @@ export async function setorTitipanJajan(
             nominal: nominalAlokasi,
             metodePembayaran: MetodePembayaran.AUTO_SYSTEM,
             keterangan:
-              `Otomatis dialihkan dari titipan uang jajan untuk ` +
+              `Otomatis dialihkan dari uang jajan untuk ` +
               `${kataAlokasi} Infaq Makan bulan ${namaBulan(tagihan.bulan)} ` +
               `${tagihan.tahun} (ref: ${referensiSetoran}, ` +
               `sumber: ${input.metodePembayaran}).`,
@@ -322,7 +323,7 @@ export async function setorTitipanJajan(
         totalMasukSaldoJajan = sisaSetoran;
 
         const keteranganTopup = [
-          `Titipan uang jajan (ref: ${referensiSetoran})`,
+          `Uang jajan (ref: ${referensiSetoran})`,
           input.keterangan,
         ]
           .filter((bagian): bagian is string => Boolean(bagian))

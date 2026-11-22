@@ -106,7 +106,8 @@ const santriFields = {
     .trim()
     .min(2, "Nama minimal 2 karakter.")
     .max(150, "Nama maksimal 150 karakter."),
-  kelas: z.string().trim().min(1, "Kelas wajib diisi.").max(50),
+  kelas: z.string().trim().min(1, "Kelas sekolah wajib diisi.").max(50),
+  kelasNgaji: optionalText(50),
   kamar: z.string().trim().min(1, "Kamar wajib diisi.").max(100),
   rfidUid: z.preprocess(
     (value) =>
@@ -189,6 +190,23 @@ const santriFields = {
   tahunMasuk: angkaTahun,
   tahunLulus: angkaTahun.optional(),
   nomorSyahadah: optionalText(100),
+  nomorUrutAsal: z.preprocess((value) => value === "" || value === null ? undefined : value, z.coerce.number().int().positive().optional()),
+  jenjangAsal: optionalText(20),
+  anakKe: z.preprocess((value) => value === "" || value === null ? undefined : value, z.coerce.number().int().positive().optional()),
+  dariSaudara: z.preprocess((value) => value === "" || value === null ? undefined : value, z.coerce.number().int().positive().optional()),
+  noIjazahSebelumnya: optionalText(100),
+  noPesertaUjianSebelumnya: optionalText(100),
+  noSkhunSebelumnya: optionalText(100),
+  diterimaDiKelas: optionalText(50),
+  tanggalDiterima: tanggalOpsional,
+  keluarDiKelas: optionalText(50),
+  tanggalKeluar: tanggalOpsional,
+  alasanKeluar: optionalText(500),
+  nomorKartuPip: optionalText(100),
+  kks: optionalText(100),
+  kps: optionalText(100),
+  pkh: optionalText(100),
+  catatanDataLegacy: optionalText(1000),
   waliId: z.preprocess((value) => typeof value === "string" && value.trim() === "" ? undefined : value, z.string().trim().min(1).max(64).optional()),
 };
 
@@ -224,16 +242,6 @@ export const santriCreateSchema = z
 export const santriUpdateSchema = z
   .object({
     ...santriFields,
-    isDispensasiInfaq: z.boolean(),
-    catatanDispensasi: z.preprocess(
-      (value) =>
-        typeof value === "string" && value.trim() === "" ? null : value,
-      z
-        .string()
-        .trim()
-        .max(500, "Catatan dispensasi maksimal 500 karakter.")
-        .nullable(),
-    ),
   })
   .partial()
   .strict();

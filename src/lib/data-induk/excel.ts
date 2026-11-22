@@ -15,6 +15,7 @@ export const SANTRI_EXCEL_HEADERS = [
   "Tanggal Lahir (YYYY-MM-DD)",
   "Jenis Kelamin (LAKI_LAKI/PEREMPUAN)",
   "Kelas",
+  "Kelas Ngaji",
   "Kamar",
   "Alamat Lengkap",
   "RT/RW",
@@ -73,6 +74,7 @@ function santriRow(item: SantriItem): Array<string | number> {
     item.tanggalLahir,
     item.jenisKelamin,
     item.kelas,
+    item.kelasNgaji ?? "",
     item.kamar,
     item.alamatLengkap,
     item.rtRw ?? "",
@@ -357,7 +359,9 @@ export function assertTemplateHeaders(
 ): void {
   const expected =
     jenis === "santri" ? SANTRI_EXCEL_HEADERS : GURU_EXCEL_HEADERS;
-  const missing = expected.filter((header) => !headers.includes(header));
+  const missing = expected.filter(
+    (header) => header !== "Kelas Ngaji" && !headers.includes(header),
+  );
 
   if (missing.length > 0) {
     throw new AppError(

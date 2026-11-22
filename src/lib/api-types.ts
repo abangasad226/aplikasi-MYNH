@@ -27,6 +27,7 @@ export type MetodePembayaran =
   | "TRANSFER_VA"
   | "QRIS"
   | "TUNAI_BENDAHARA"
+  | "TUNAI_KASIR"
   | "AUTO_SYSTEM";
 
 export type JenisTagihan =
@@ -396,6 +397,7 @@ export interface SantriItem {
   nism: string | null;
   name: string;
   kelas: string;
+  kelasNgaji: string | null;
   kamar: string;
   rfidUid: string | null;
   barcodeCode: string;
@@ -445,6 +447,23 @@ export interface SantriItem {
   tahunMasuk: number;
   tahunLulus: number | null;
   nomorSyahadah: string | null;
+  nomorUrutAsal: number | null;
+  jenjangAsal: string | null;
+  anakKe: number | null;
+  dariSaudara: number | null;
+  noIjazahSebelumnya: string | null;
+  noPesertaUjianSebelumnya: string | null;
+  noSkhunSebelumnya: string | null;
+  diterimaDiKelas: string | null;
+  tanggalDiterima: string | null;
+  keluarDiKelas: string | null;
+  tanggalKeluar: string | null;
+  alasanKeluar: string | null;
+  nomorKartuPip: string | null;
+  kks: string | null;
+  kps: string | null;
+  pkh: string | null;
+  catatanDataLegacy: string | null;
   saldoJajan: string;
   limitJajanHarian: string;
   isDispensasiInfaq: boolean;
@@ -551,6 +570,7 @@ export interface ImportReport {
     baris: number;
     pesan: string;
   }>;
+  warnings?: string[];
 }
 
 export interface SantriMutationResponse {

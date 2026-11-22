@@ -1,7 +1,7 @@
 import {
   JenisMutasiSantri,
   Prisma,
-  Role,
+
   StatusSantri,
 } from "@prisma/client";
 import type { NextRequest } from "next/server";
@@ -64,17 +64,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     const body = await parseJson(request);
     const input = santriUpdateSchema.parse(body);
 
-    if (
-      (input.isDispensasiInfaq !== undefined ||
-        input.catatanDispensasi !== undefined) &&
-      actor.role !== Role.BENDAHARA
-    ) {
-      throw new AppError(
-        403,
-        "FORBIDDEN",
-        "Pengaturan dispensasi Infaq Makan hanya dapat dilakukan oleh Bendahara.",
-      );
-    }
 
     if (input.waliId && input.waliId !== existing.waliId) {
       await assertWaliUser(prisma, input.waliId);
@@ -137,6 +126,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       ...(input.nism !== undefined ? { nism: input.nism ?? null } : {}),
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.kelas !== undefined ? { kelas: input.kelas } : {}),
+      ...(input.kelasNgaji !== undefined ? { kelasNgaji: input.kelasNgaji ?? null } : {}),
       ...(input.kamar !== undefined ? { kamar: input.kamar } : {}),
       ...(input.rfidUid !== undefined ? { rfidUid: input.rfidUid } : {}),
       ...(input.barcodeCode !== undefined
@@ -267,12 +257,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
               : {}),
           }),
       ...(input.waliId !== undefined ? { waliId: input.waliId } : {}),
-      ...(input.isDispensasiInfaq !== undefined
-        ? { isDispensasiInfaq: input.isDispensasiInfaq }
-        : {}),
-      ...(input.catatanDispensasi !== undefined
-        ? { catatanDispensasi: input.catatanDispensasi ?? null }
-        : {}),
+
     };
 
     let riwayat:

@@ -81,6 +81,7 @@ export default function KantinPosPage() {
   const [activeIdentifier, setActiveIdentifier] = useState("");
 
   const [nominal, setNominal] = useState("");
+
   const [pin, setPin] = useState("");
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -325,6 +326,7 @@ export default function KantinPosPage() {
     setPinModalOpen(false);
     window.setTimeout(() => inputRef.current?.focus(), 60);
   }
+
 
   async function submitPayment(pinValue?: string) {
     if (!kartu || !konteks || !activeIdentifier || nominalBig <= 0n || nominalError) {
@@ -614,7 +616,7 @@ export default function KantinPosPage() {
                       {formatRupiah(kartu.saldoJajan)}
                     </p>
                     <p className="mt-1 text-[11px] text-slate-400">
-                      Dana titipan wali
+                      Saldo uang jajan
                     </p>
                   </div>
                   <div className="p-5 sm:p-6">
