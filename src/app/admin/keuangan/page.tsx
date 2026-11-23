@@ -27,6 +27,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PesantrenLogo } from "@/components/pesantren-logo";
+import { FinancialCharts } from "@/components/bendahara/FinancialCharts";
 import { PenyesuaianPanel } from "./penyesuaian-panel";
 import { TagihanPanel } from "./tagihan-panel";
 import { TopupPanel } from "./topup-panel";
@@ -621,6 +622,8 @@ export default function AdminKeuanganPage() {
             </>
           ) : null}
         </section>
+
+        <FinancialCharts />
 
         <section className="grid gap-6 lg:grid-cols-3">
           <Card

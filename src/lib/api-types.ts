@@ -370,12 +370,25 @@ export type PendidikanTerakhir =
   | "S3"
   | "PESANTREN_SALAF";
 export type JabatanGuru =
+  | "PENDIRI_YAYASAN"
+  | "KETUA_YAYASAN"
+  | "WAKIL_KETUA_YAYASAN"
+  | "PIMPINAN_PESANTREN"
+  | "SEKRETARIS_YAYASAN"
   | "PENGASUH"
   | "KEPALA_MADRASAH"
   | "USTADZ_NGAJI"
   | "GURU_MAPEL"
   | "BENDAHARA"
-  | "STAF_TATA_USAHA";
+  | "STAF_TATA_USAHA"
+  | "SEKSI_PENDIDIKAN"
+  | "SEKSI_HUMAS"
+  | "SEKSI_KEAMANAN"
+  | "SEKSI_KEBERSIHAN"
+  | "SEKSI_PERALATAN"
+  | "SEKSI_PEMBANGUNAN"
+  | "SEKSI_MULTIMEDIA"
+  | "SEKSI_KESENIAN";
 export type StatusKepegawaian = "GTY" | "GTT" | "PNS_DPK" | "PENGABDIAN";
 export type JenisMutasiSantri =
   | "KENAIKAN_KELAS"

@@ -137,12 +137,25 @@ enum RentangPenghasilan {
 }
 
 enum JabatanGtk {
+  PENDIRI_YAYASAN
+  KETUA_YAYASAN
+  WAKIL_KETUA_YAYASAN
+  PIMPINAN_PESANTREN
+  SEKRETARIS_YAYASAN
   PENGASUH
   KEPALA_MADRASAH
   USTADZ_NGAJI
   GURU_MAPEL
   BENDAHARA
   STAF_TATA_USAHA
+  SEKSI_PENDIDIKAN
+  SEKSI_HUMAS
+  SEKSI_KEAMANAN
+  SEKSI_KEBERSIHAN
+  SEKSI_PERALATAN
+  SEKSI_PEMBANGUNAN
+  SEKSI_MULTIMEDIA
+  SEKSI_KESENIAN
 }
 
 enum StatusKepegawaian {
@@ -193,16 +206,16 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  santriWali         Santri[]            @relation("WaliSantri")
-  transaksiDibuat    TransaksiKeuangan[] @relation("TransaksiDibuatOleh")
-  merchant           MerchantKantin?
-  pelanggaranDicatat LogPelanggaran[]    @relation("PelanggaranDicatatOleh")
-  systemSettingsDiubah SystemSetting[] @relation("SystemSettingDiubahOleh")
+  santriWali            Santri[]                   @relation("WaliSantri")
+  transaksiDibuat       TransaksiKeuangan[]        @relation("TransaksiDibuatOleh")
+  merchant              MerchantKantin?
+  pelanggaranDicatat    LogPelanggaran[]           @relation("PelanggaranDicatatOleh")
+  systemSettingsDiubah  SystemSetting[]            @relation("SystemSettingDiubahOleh")
   jenisPembayaranDibuat JenisPembayaranKustom[]
-  pengingatTagihanWA PengingatTagihanWA[]
-  penyesuaianKeuangan AuditPenyesuaianKeuangan[]
+  pengingatTagihanWA    PengingatTagihanWA[]
+  penyesuaianKeuangan   AuditPenyesuaianKeuangan[]
   // Opsional: satu akun login maksimal terhubung ke satu profil pendidik.
-  guruDanTendik      GuruDanTendik?      @relation("GuruDanTendikUser")
+  guruDanTendik         GuruDanTendik?             @relation("GuruDanTendikUser")
 
   @@index([role])
 }
@@ -293,23 +306,23 @@ model Santri {
   fileIjazahUrl String?
 
   // -------------------- Arsip dari buku induk lama --------------------------
-  nomorUrutAsal                  Int?
-  jenjangAsal                    String?
-  anakKe                         Int?
-  dariSaudara                    Int?
-  noIjazahSebelumnya             String?
-  noPesertaUjianSebelumnya       String?
-  noSkhunSebelumnya              String?
-  diterimaDiKelas                 String?
-  tanggalDiterima                 DateTime? @db.Date
-  keluarDiKelas                   String?
-  tanggalKeluar                  DateTime? @db.Date
-  alasanKeluar                   String?
-  nomorKartuPip                  String?
-  kks                            String?
-  kps                            String?
-  pkh                            String?
-  catatanDataLegacy              String?
+  nomorUrutAsal            Int?
+  jenjangAsal              String?
+  anakKe                   Int?
+  dariSaudara              Int?
+  noIjazahSebelumnya       String?
+  noPesertaUjianSebelumnya String?
+  noSkhunSebelumnya        String?
+  diterimaDiKelas          String?
+  tanggalDiterima          DateTime? @db.Date
+  keluarDiKelas            String?
+  tanggalKeluar            DateTime? @db.Date
+  alasanKeluar             String?
+  nomorKartuPip            String?
+  kks                      String?
+  kps                      String?
+  pkh                      String?
+  catatanDataLegacy        String?
 
   // ----------------------- Status kepesantrenan -----------------------------
   statusMukim   StatusMukim  @default(MUKIM)
@@ -318,16 +331,16 @@ model Santri {
   tahunLulus    Int?
   nomorSyahadah String? // wajib diisi saat statusSantri = ALUMNI
 
-  wali           User                  @relation("WaliSantri", fields: [waliId], references: [id], onDelete: Restrict)
-  tagihan        Tagihan[]
-  transaksi      TransaksiKeuangan[]
-  logAkademik    LogAkademikDanNgaji[]
-  logPelanggaran LogPelanggaran[]
-  riwayatMutasi  RiwayatMutasiSantri[]
-  nilaiUlangan   NilaiUlangan[]
-  rapor          RaporSantri[]
+  wali                     User                       @relation("WaliSantri", fields: [waliId], references: [id], onDelete: Restrict)
+  tagihan                  Tagihan[]
+  transaksi                TransaksiKeuangan[]
+  logAkademik              LogAkademikDanNgaji[]
+  logPelanggaran           LogPelanggaran[]
+  riwayatMutasi            RiwayatMutasiSantri[]
+  nilaiUlangan             NilaiUlangan[]
+  rapor                    RaporSantri[]
   auditPenyesuaianKeuangan AuditPenyesuaianKeuangan[]
-  pengingatTagihanWA PengingatTagihanWA[]
+  pengingatTagihanWA       PengingatTagihanWA[]
 
   @@index([waliId])
   @@index([statusAktif])
@@ -351,16 +364,17 @@ model SystemSetting {
 }
 
 model JenisPembayaranKustom {
-  id          String   @id @default(cuid())
-  nama        String
-  nominal     BigInt
-  jatuhTempo  DateTime @db.Date
-  keterangan  String?
+  id           String   @id @default(cuid())
+  nama         String
+  nominal      BigInt
+  jatuhTempo   DateTime @db.Date
+  keterangan   String?
   dibuatOlehId String
-  createdAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
 
-  dibuatOleh User @relation(fields: [dibuatOlehId], references: [id], onDelete: Restrict)
+  dibuatOleh User      @relation(fields: [dibuatOlehId], references: [id], onDelete: Restrict)
   tagihan    Tagihan[]
+
   @@index([createdAt])
 }
 
@@ -369,25 +383,26 @@ model PengingatTagihanWA {
   santriId  String
   userId    String
   createdAt DateTime @default(now())
-  santri    Santri @relation(fields: [santriId], references: [id], onDelete: Cascade)
-  user      User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
   @@index([santriId, createdAt])
 }
 
 model Tagihan {
-  id              String        @id @default(cuid())
-  santriId        String
+  id                      String                 @id @default(cuid())
+  santriId                String
   jenisPembayaranKustomId String?
-  jenisPembayaranKustom JenisPembayaranKustom? @relation(fields: [jenisPembayaranKustomId], references: [id], onDelete: Restrict)
-  jenisTagihan    JenisTagihan
-  bulan           Int
-  tahun           Int
-  nominalTagihan  BigInt
-  nominalTerbayar BigInt        @default(0)
-  status          StatusTagihan @default(BELUM_LUNAS)
-  jatuhTempo      DateTime      @db.Date
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  jenisPembayaranKustom   JenisPembayaranKustom? @relation(fields: [jenisPembayaranKustomId], references: [id], onDelete: Restrict)
+  jenisTagihan            JenisTagihan
+  bulan                   Int
+  tahun                   Int
+  nominalTagihan          BigInt
+  nominalTerbayar         BigInt                 @default(0)
+  status                  StatusTagihan          @default(BELUM_LUNAS)
+  jatuhTempo              DateTime               @db.Date
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
 
   santri    Santri              @relation(fields: [santriId], references: [id], onDelete: Restrict)
   transaksi TransaksiKeuangan[]
@@ -533,7 +548,7 @@ model GuruDanTendik {
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
-  user User? @relation("GuruDanTendikUser", fields: [userId], references: [id], onDelete: SetNull)
+  user          User?           @relation("GuruDanTendikUser", fields: [userId], references: [id], onDelete: SetNull)
   mataPelajaran MataPelajaran[]
 
   @@index([jabatan])
@@ -543,16 +558,16 @@ model GuruDanTendik {
 }
 
 model MataPelajaran {
-  id          String        @id @default(cuid())
-  kodeMapel   String        @unique
-  namaMapel   String
-  kategori    KategoriMapel
-  kkm         Int           @default(75)
-  pengampuId  String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id         String        @id @default(cuid())
+  kodeMapel  String        @unique
+  namaMapel  String
+  kategori   KategoriMapel
+  kkm        Int           @default(75)
+  pengampuId String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
-  pengampu GuruDanTendik @relation(fields: [pengampuId], references: [id], onDelete: Restrict)
+  pengampu GuruDanTendik  @relation(fields: [pengampuId], references: [id], onDelete: Restrict)
   nilai    NilaiUlangan[]
 
   @@index([pengampuId])
@@ -581,18 +596,18 @@ model NilaiUlangan {
 }
 
 model RaporSantri {
-  id                 String      @id @default(cuid())
-  santriId           String
-  semester           Semester
-  tahunAjaran        String
-  statusRapor        StatusRapor @default(DRAFT)
-  catatanWaliKelas   String      @default("")
+  id                String      @id @default(cuid())
+  santriId          String
+  semester          Semester
+  tahunAjaran       String
+  statusRapor       StatusRapor @default(DRAFT)
+  catatanWaliKelas  String      @default("")
   keputusanKenaikan String      @default("")
-  tanggalTerbit      DateTime?
+  tanggalTerbit     DateTime?
   // Rapor terbit tidak berubah ketika biodata, mapel, atau log diperbarui.
-  snapshot           Json?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  snapshot          Json?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   santri Santri @relation(fields: [santriId], references: [id], onDelete: Restrict)
 

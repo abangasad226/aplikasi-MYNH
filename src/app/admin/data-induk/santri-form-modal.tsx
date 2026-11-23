@@ -21,6 +21,7 @@ import type {
 } from "@/lib/api-types";
 import { apiFetch, toErrorMessage } from "@/lib/client-api";
 
+import { AddressSelectors } from "./address-selectors";
 import {
   Field,
   FormSection,
@@ -531,42 +532,13 @@ export function SantriFormModal({
                 placeholder="003 / 004"
               />
             </Field>
-            <Field label="Desa / Kelurahan" htmlFor="desaKelurahan" required>
-              <TextInput
-                id="desaKelurahan"
-                value={values.desaKelurahan}
-                onChange={(event) =>
-                  update("desaKelurahan", event.target.value)
-                }
-                placeholder="Tambakberas"
-              />
-            </Field>
-            <Field label="Kecamatan" htmlFor="kecamatan" required>
-              <TextInput
-                id="kecamatan"
-                value={values.kecamatan}
-                onChange={(event) => update("kecamatan", event.target.value)}
-                placeholder="Jombang"
-              />
-            </Field>
-            <Field label="Kabupaten / Kota" htmlFor="kabupatenKota" required>
-              <TextInput
-                id="kabupatenKota"
-                value={values.kabupatenKota}
-                onChange={(event) =>
-                  update("kabupatenKota", event.target.value)
-                }
-                placeholder="Kabupaten Jombang"
-              />
-            </Field>
-            <Field label="Provinsi" htmlFor="provinsi" required>
-              <TextInput
-                id="provinsi"
-                value={values.provinsi}
-                onChange={(event) => update("provinsi", event.target.value)}
-                placeholder="Jawa Timur"
-              />
-            </Field>
+            <AddressSelectors
+              provinsi={values.provinsi}
+              kabupatenKota={values.kabupatenKota}
+              kecamatan={values.kecamatan}
+              desaKelurahan={values.desaKelurahan}
+              onChange={(field, value) => update(field, value)}
+            />
             <Field label="Nomor KK" htmlFor="nomorKK" required hint="16 digit angka.">
               <TextInput
                 id="nomorKK"

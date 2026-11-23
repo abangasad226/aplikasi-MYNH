@@ -53,7 +53,7 @@ export const GURU_EXCEL_HEADERS = [
   "Jenis Kelamin (LAKI_LAKI/PEREMPUAN)",
   "Pendidikan Terakhir (TIDAK_SEKOLAH/SD/SMP/SMA_MA/D3/S1/S2/S3/PESANTREN_SALAF)",
   "Jurusan",
-  "Jabatan (PENGASUH/KEPALA_MADRASAH/USTADZ_NGAJI/GURU_MAPEL/BENDAHARA/STAF_TATA_USAHA)",
+  "Jabatan (PENDIRI_YAYASAN/KETUA_YAYASAN/WAKIL_KETUA_YAYASAN/PIMPINAN_PESANTREN/SEKRETARIS_YAYASAN/PENGASUH/KEPALA_MADRASAH/USTADZ_NGAJI/GURU_MAPEL/BENDAHARA/STAF_TATA_USAHA/SEKSI_PENDIDIKAN/SEKSI_HUMAS/SEKSI_KEAMANAN/SEKSI_KEBERSIHAN/SEKSI_PERALATAN/SEKSI_PEMBANGUNAN/SEKSI_MULTIMEDIA/SEKSI_KESENIAN)",
   "Status Kepegawaian (GTY/GTT/PNS_DPK/PENGABDIAN)",
   "Mapel/Kitab",
   "No HP",
@@ -147,7 +147,7 @@ function petunjukSheet(jenis: ExcelJenis): XLSX.WorkSheet {
           ["1. Jangan mengubah nama kolom pada sheet Data."],
           ["2. Tanggal wajib berformat YYYY-MM-DD, contoh 1980-08-15."],
           [
-            "3. Isi kolom bertanda pilihan dengan kode yang tertera, misalnya S1, USTADZ_NGAJI, GTY.",
+            "3. Isi kolom bertanda pilihan dengan kode yang tertera, misalnya S1, KETUA_YAYASAN, PIMPINAN_PESANTREN, USTADZ_NGAJI, GTY.",
           ],
           ["4. NIK, NIP, NUPTK, dan NPK harus unik bila diisi."],
           [
