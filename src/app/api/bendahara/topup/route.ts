@@ -9,6 +9,8 @@ import { prisma } from "@/lib/prisma";
 import { MAX_NOMINAL_SETORAN } from "@/lib/constants";
 import { web3Service } from "@/lib/web3Service";
 
+export const dynamic = "force-dynamic";
+
 const schema = z.object({ santriId: z.string().trim().min(1).max(64), nominal: z.string().regex(/^\d+$/).transform(BigInt).refine((value) => value > 0n && value <= MAX_NOMINAL_SETORAN, "Nominal top-up di luar batas yang diizinkan."), keterangan: z.string().trim().max(300).optional() }).strict();
 
 export async function GET(request: NextRequest) {

@@ -8,6 +8,8 @@ import { AppError } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
 import { createSantriWithWallet, hitungTunggakan, SANTRI_SELECT, serializeSantri } from "@/lib/data-induk/santri-service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await requireRoles(request, [Role.OPERATOR, Role.BENDAHARA]);

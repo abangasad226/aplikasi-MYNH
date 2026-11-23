@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Field, SelectInput } from "./form-fields";
 
@@ -42,6 +42,7 @@ export function AddressSelectors({
   const [regencyCode, setRegencyCode] = useState("");
   const [districtCode, setDistrictCode] = useState("");
   const [error, setError] = useState("");
+  const initialAddress = useRef({ provinsi, kabupatenKota, kecamatan });
 
   useEffect(() => {
     let active = true;
@@ -50,21 +51,21 @@ export function AddressSelectors({
         const provinceItems = await getWilayah("provinces");
         if (!active) return;
         setProvinces(provinceItems);
-        const province = matching(provinceItems, provinsi);
+        const province = matching(provinceItems, initialAddress.current.provinsi);
         if (!province) return;
         setProvinceCode(province.code);
 
         const regencyItems = await getWilayah("regencies", province.code);
         if (!active) return;
         setRegencies(regencyItems);
-        const regency = matching(regencyItems, kabupatenKota);
+        const regency = matching(regencyItems, initialAddress.current.kabupatenKota);
         if (!regency) return;
         setRegencyCode(regency.code);
 
         const districtItems = await getWilayah("districts", regency.code);
         if (!active) return;
         setDistricts(districtItems);
-        const district = matching(districtItems, kecamatan);
+        const district = matching(districtItems, initialAddress.current.kecamatan);
         if (!district) return;
         setDistrictCode(district.code);
 

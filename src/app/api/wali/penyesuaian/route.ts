@@ -5,6 +5,8 @@ import { AppError } from "@/lib/errors";
 import { requireRoles } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const wali = await requireRoles(request, [Role.WALI_SANTRI]);

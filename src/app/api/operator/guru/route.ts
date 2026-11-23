@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { guruCreateSchema } from "@/lib/validators/data-induk";
 import { AppError } from "@/lib/errors";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await requireRoles(request, [Role.OPERATOR, Role.BENDAHARA]);

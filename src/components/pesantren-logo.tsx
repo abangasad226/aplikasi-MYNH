@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { Landmark } from "lucide-react";
 
@@ -26,9 +27,11 @@ export function PesantrenLogo({
     <div
       className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-slate-200 shadow-sm ${className}`}
     >
-      <img
+      <Image
         src="/images/logo-pesantren.png"
         alt="Logo Pondok Pesantren Nurul Huda Pangauban"
+        width={128}
+        height={128}
         className="h-full w-full object-contain"
         onError={() => setError(true)}
       />

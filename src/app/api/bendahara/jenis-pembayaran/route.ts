@@ -6,6 +6,8 @@ import { requireRoles } from "@/lib/auth/session";
 import { AppError } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const schema = z.object({
   nama: z.string().trim().min(2).max(120),
   nominal: z.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER),

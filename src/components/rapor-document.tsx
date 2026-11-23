@@ -1,4 +1,5 @@
 import "@/app/rapor/[id]/rapor.css";
+import Image from "next/image";
 import type { JenisKegiatan } from "@/lib/api-types";
 import { KATEGORI_MAPEL_LABEL, KEGIATAN_RAPOR_LABEL, type KategoriMapel, type RaporDetail } from "@/lib/akademik-types";
 
@@ -12,7 +13,7 @@ export function RaporDocument({ rapor }: { rapor: RaporDetail }) {
     <article className="rapor-document mx-auto max-w-[210mm] bg-white p-5 text-slate-900 sm:p-9">
       <header className="border-b-4 border-double border-slate-700 pb-5 text-center flex items-center justify-between px-4">
         <div className="w-16 h-16 shrink-0 flex items-center justify-center">
-          <img src="/images/logo-pesantren.png" alt="Logo" className="h-14 w-14 object-contain" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+          <Image src="/images/logo-pesantren.png" alt="Logo" width={56} height={56} className="h-14 w-14 object-contain" onError={(event) => { event.currentTarget.style.display = "none"; }} />
         </div>
         <div className="flex-1 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.15em]">Pondok Pesantren</p>
@@ -34,8 +35,7 @@ export function RaporDocument({ rapor }: { rapor: RaporDetail }) {
         </dl>
         <div className="flex h-28 w-20 shrink-0 items-center justify-center overflow-hidden border border-slate-300 bg-slate-50 text-center text-xs text-slate-400">
           {isi.santri.fotoSantriUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={isi.santri.fotoSantriUrl} alt={`Foto ${isi.santri.name}`} className="h-full w-full object-cover" />
+            <Image src={isi.santri.fotoSantriUrl} alt={`Foto ${isi.santri.name}`} width={80} height={112} unoptimized className="h-full w-full object-cover" />
           ) : "Foto Santri"}
         </div>
       </section>

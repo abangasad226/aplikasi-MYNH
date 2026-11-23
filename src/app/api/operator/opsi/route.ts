@@ -4,6 +4,8 @@ import { Role } from "@prisma/client";
 import { errorResponse, jsonData } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await requireRoles(request, [Role.OPERATOR, Role.BENDAHARA]);

@@ -8,6 +8,8 @@ import { requireRoles } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { web3Service } from "@/lib/web3Service";
 
+export const dynamic = "force-dynamic";
+
 const bodySchema = z.object({
   targetId: z.string().trim().min(1).max(100),
   jenisTarget: z.nativeEnum(JenisTargetPenyesuaian),

@@ -5,6 +5,8 @@ import { requireRoles } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/lib/errors";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const actor = await requireRoles(request, [Role.OPERATOR, Role.BENDAHARA, Role.USTADZ_PENGURUS, Role.KASIR_KANTIN]);
